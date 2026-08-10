@@ -65,6 +65,7 @@ export default function AlertsTable() {
       <div className="search-row">
         <input
           type="text"
+          aria-label="Filter alerts by description or source IP"
           placeholder="Filter by description or source IP…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
