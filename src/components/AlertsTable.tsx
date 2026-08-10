@@ -1,11 +1,6 @@
-import { memo, useMemo, useState, type CSSProperties } from 'react'
-import { FixedSizeList, type ListChildComponentProps } from 'react-window'
-import { useDashboardData } from '../hooks/useDashboardData'
-import { useDebouncedValue } from '../hooks/useDebouncedValue'
+import { useEffect, useState } from 'react'
+import { fetchAlerts } from '../data/mockApi'
 import type { Alert } from '../types'
-
-const ROW_HEIGHT = 40
-const LIST_HEIGHT = 420
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleString(undefined, {
@@ -16,15 +11,13 @@ function formatTime(iso: string) {
   })
 }
 
-/**
- * PERF FIX: wrapped in React.memo. Because AlertsTable now passes a stable
- * `alert` object reference (unchanged unless that row's data actually
- * changes) and no inline callbacks, this component skips re-rendering
- * when unrelated dashboard state changes.
- */
-const AlertRow = memo(function AlertRow({ alert, style }: { alert: Alert; style: CSSProperties }) {
+// BUG: not memoized. Combined with the inline `onSelect` callback passed
+// from AlertsTable below (a new function every render), this component
+// re-renders on every parent render regardless — memoizing it alone
+// wouldn't even help without also fixing the prop below.
+function AlertRow({ alert, onSelect }: { alert: Alert; onSelect: (id: string) => void }) {
   return (
-    <div className="table-row" style={style}>
+    <div className="table-row" onClick={() => onSelect(alert.id)}>
       <span className="mono-dim">{alert.id}</span>
       <span className="mono-dim">{formatTime(alert.timestamp)}</span>
       <span>{alert.description}</span>
@@ -37,33 +30,34 @@ const AlertRow = memo(function AlertRow({ alert, style }: { alert: Alert; style:
       </span>
     </div>
   )
-})
+}
 
 export default function AlertsTable() {
-  const { alerts, loading } = useDashboardData()
+  // BUG: a third independent fetch of data KpiCards/ChartPanel already
+  // requested in their own effects.
+  const [alerts, setAlerts] = useState<Alert[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const debouncedSearch = useDebouncedValue(search, 250)
 
-  // PERF FIX: filtering + sorting 5,000 rows is real work — O(n log n) on
-  // every render. useMemo means it only re-runs when the alert list or the
-  // (debounced) search term actually changes, not on every parent re-render.
-  const filtered = useMemo(() => {
-    const term = debouncedSearch.trim().toLowerCase()
-    const base = term
-      ? alerts.filter(
-          (a) => a.description.toLowerCase().includes(term) || a.sourceIp.includes(term)
-        )
-      : alerts
-    return [...base].sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1))
-  }, [alerts, debouncedSearch])
+  useEffect(() => {
+    fetchAlerts().then((result) => {
+      setAlerts(result)
+      setLoading(false)
+    })
+  }, [])
 
   if (loading) {
     return <div className="loading">Loading alerts…</div>
   }
 
-  const Row = ({ index, style }: ListChildComponentProps) => (
-    <AlertRow alert={filtered[index]} style={style} />
-  )
+  // BUG: filtering + sorting 5,000 rows recomputed on every render —
+  // including every keystroke (no debounce) and every unrelated re-render
+  // of the App above (e.g. the header clock ticking every 2s).
+  const term = search.trim().toLowerCase()
+  const filtered = term
+    ? alerts.filter((a) => a.description.toLowerCase().includes(term) || a.sourceIp.includes(term))
+    : alerts
+  const sorted = [...filtered].sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1))
 
   return (
     <div className="panel">
@@ -76,7 +70,7 @@ export default function AlertsTable() {
           onChange={(e) => setSearch(e.target.value)}
         />
         <span className="result-count">
-          {filtered.length.toLocaleString()} / {alerts.length.toLocaleString()}
+          {sorted.length.toLocaleString()} / {alerts.length.toLocaleString()}
         </span>
       </div>
       <div className="table-head">
@@ -87,17 +81,15 @@ export default function AlertsTable() {
         <span>Source IP</span>
         <span>Status</span>
       </div>
-      {/* PERF FIX: only the ~10-15 rows visible in the viewport are ever
-          mounted in the DOM, instead of all 5,000. Scroll performance and
-          initial render time stop scaling with the size of the alert list. */}
-      <FixedSizeList
-        height={LIST_HEIGHT}
-        itemCount={filtered.length}
-        itemSize={ROW_HEIGHT}
-        width="100%"
-      >
-        {Row}
-      </FixedSizeList>
+      {/* BUG: every row renders into the DOM at once. With 5,000 alerts
+          that's 5,000 mounted rows on first paint, and again on every
+          re-render described above — instead of only the ~15 rows the
+          viewport can actually show. */}
+      <div style={{ maxHeight: 420, overflowY: 'auto' }}>
+        {sorted.map((alert) => (
+          <AlertRow key={alert.id} alert={alert} onSelect={(id) => console.log('selected', id)} />
+        ))}
+      </div>
     </div>
   )
 }

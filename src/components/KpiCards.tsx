@@ -1,7 +1,20 @@
-import { useDashboardData } from '../hooks/useDashboardData'
+import { useEffect, useState } from 'react'
+import { fetchMetrics } from '../data/mockApi'
+import type { DashboardMetrics } from '../types'
 
+// BUG: this component fetches its own copy of the metrics with its own
+// useEffect. ChartPanel below does the exact same fetch independently —
+// two network requests for identical data, every time the dashboard mounts.
 export default function KpiCards() {
-  const { metrics, loading } = useDashboardData()
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchMetrics().then((result) => {
+      setMetrics(result)
+      setLoading(false)
+    })
+  }, [])
 
   if (loading || !metrics) {
     return <div className="loading">Loading metrics…</div>

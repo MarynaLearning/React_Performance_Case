@@ -1,8 +1,19 @@
+import { useEffect, useState } from 'react'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
-import { useDashboardData } from '../hooks/useDashboardData'
+import { fetchMetrics } from '../data/mockApi'
+import type { DashboardMetrics } from '../types'
 
+// BUG: independent fetch, duplicating the request KpiCards already makes.
 export default function ChartPanel() {
-  const { metrics, loading } = useDashboardData()
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchMetrics().then((result) => {
+      setMetrics(result)
+      setLoading(false)
+    })
+  }, [])
 
   if (loading || !metrics) {
     return <div className="loading">Loading chart…</div>
