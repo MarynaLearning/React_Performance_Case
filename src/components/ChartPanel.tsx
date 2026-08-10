@@ -1,6 +1,12 @@
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { useDashboardData } from '../hooks/useDashboardData'
 
+// Colors reference the CSS custom properties defined in index.css
+// (var(--signal-amber) etc.) rather than duplicating hex values here.
+// index.css stays the single source of truth for the palette — change a
+// color there and this chart follows automatically. Modern browsers
+// resolve CSS custom properties in SVG presentation attributes the same
+// way they do in stylesheets.
 export default function ChartPanel() {
   const { metrics, loading } = useDashboardData()
 
@@ -15,28 +21,28 @@ export default function ChartPanel() {
         <AreaChart data={metrics.points} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
           <defs>
             <linearGradient id="eventsFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f0a93b" stopOpacity={0.35} />
-              <stop offset="100%" stopColor="#f0a93b" stopOpacity={0} />
+              <stop offset="0%" stopColor="var(--signal-amber)" stopOpacity={0.35} />
+              <stop offset="100%" stopColor="var(--signal-amber)" stopOpacity={0} />
             </linearGradient>
             <linearGradient id="blockedFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#4fd1c5" stopOpacity={0.35} />
-              <stop offset="100%" stopColor="#4fd1c5" stopOpacity={0} />
+              <stop offset="0%" stopColor="var(--signal-teal)" stopOpacity={0.35} />
+              <stop offset="100%" stopColor="var(--signal-teal)" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid stroke="#232d4a" vertical={false} />
-          <XAxis dataKey="hour" stroke="#8891ab" fontSize={11} tickLine={false} axisLine={false} />
-          <YAxis stroke="#8891ab" fontSize={11} tickLine={false} axisLine={false} width={40} />
+          <CartesianGrid stroke="var(--border)" vertical={false} />
+          <XAxis dataKey="hour" stroke="var(--text-dim)" fontSize={11} tickLine={false} axisLine={false} />
+          <YAxis stroke="var(--text-dim)" fontSize={11} tickLine={false} axisLine={false} width={40} />
           <Tooltip
             contentStyle={{
-              background: '#182140',
-              border: '1px solid #232d4a',
+              background: 'var(--surface-raised)',
+              border: '1px solid var(--border)',
               borderRadius: 8,
               fontSize: 12,
-              fontFamily: 'JetBrains Mono, monospace',
+              fontFamily: 'var(--font-mono)',
             }}
           />
-          <Area type="monotone" dataKey="events" stroke="#f0a93b" fill="url(#eventsFill)" strokeWidth={2} />
-          <Area type="monotone" dataKey="blocked" stroke="#4fd1c5" fill="url(#blockedFill)" strokeWidth={2} />
+          <Area type="monotone" dataKey="events" stroke="var(--signal-amber)" fill="url(#eventsFill)" strokeWidth={2} />
+          <Area type="monotone" dataKey="blocked" stroke="var(--signal-teal)" fill="url(#blockedFill)" strokeWidth={2} />
         </AreaChart>
       </ResponsiveContainer>
     </div>

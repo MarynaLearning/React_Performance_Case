@@ -1,5 +1,6 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense } from 'react'
 import { DashboardDataProvider } from './hooks/useDashboardData'
+import { DashboardHeader } from './components/DashboardHeader'
 import KpiCards from './components/KpiCards'
 import AlertsTable from './components/AlertsTable'
 
@@ -8,30 +9,16 @@ import AlertsTable from './components/AlertsTable'
 // initial paint instead of blocking it.
 const ChartPanel = lazy(() => import('./components/ChartPanel'))
 
+/**
+ * Pure composition: App owns no state of its own. Data comes from
+ * DashboardDataProvider, the clock lives inside DashboardHeader/LiveClock,
+ * and every section below is a self-contained component.
+ */
 export default function App() {
-  // A live clock in the header, ticking every 2s — unrelated to alerts/metrics.
-  // On the `before-fix` branch this alone is enough to re-render all 5,000
-  // table rows on every tick. Here it doesn't touch the table at all.
-  const [now, setNow] = useState(() => new Date())
-
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 2000)
-    return () => clearInterval(id)
-  }, [])
-
   return (
     <DashboardDataProvider>
       <div className="app">
-        <header className="app-header">
-          <div className="brand">
-            <span className="brand-mark" />
-            <h1>Threat Watch</h1>
-            <span className="subtitle">security alerts dashboard</span>
-          </div>
-          <span className="status-pill">
-            LIVE · {now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-          </span>
-        </header>
+        <DashboardHeader />
 
         <KpiCards />
         <Suspense fallback={<div className="loading">Loading chart…</div>}>

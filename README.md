@@ -55,6 +55,44 @@ account needed:
    Time to Interactive / Total Blocking Time comparison — the windowed list
    on `main` mounts far fewer DOM nodes on first paint.
 
+## Architecture (main branch)
+
+Beyond the performance fixes above, `main` is also structured around
+separation of concerns:
+
+```
+src/
+  components/
+    AlertsTable.tsx     presentation only — search input + virtualized list
+    AlertRow.tsx         one table row
+    SeverityBadge.tsx    reusable status atom
+    StatusDot.tsx        reusable status atom
+    KpiCards.tsx         data-driven — maps over a list of KPI configs
+    KpiCard.tsx          one KPI card
+    ChartPanel.tsx       reads colors from index.css custom properties
+    DashboardHeader.tsx  layout, separated from App
+    LiveClock.tsx        owns its own ticking state (colocated)
+  hooks/
+    useDashboardData.tsx shared data-fetching context
+    useFilteredAlerts.ts  filter/sort "controller" logic for the table
+    useDebouncedValue.ts  generic debounce utility
+  lib/
+    format.ts             pure, reusable formatting helpers
+  constants.ts             previously-scattered magic numbers, centralized
+```
+
+The guiding rule: a file should do one thing. `AlertsTable.tsx` used to
+own data access, filtering logic, debounce wiring, and row rendering all
+at once — now each of those lives in its own file, and `AlertsTable.tsx`
+just wires them together. `App.tsx` used to hold a clock's `setInterval`
+state purely so a header could display it — now `LiveClock` owns that
+state itself, so a header clock ticking no longer re-renders anything
+above it in the tree.
+
+The `before-fix` branch is intentionally left unrefactored — it exists to
+demonstrate the render-behavior bugs, not architecture, so cleaning it up
+would blur the comparison.
+
 ## Testing with Lighthouse
 
 Run Lighthouse against the **production build**, not `npm run dev`. The

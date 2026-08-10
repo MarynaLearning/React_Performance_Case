@@ -1,4 +1,5 @@
 import { useDashboardData } from '../hooks/useDashboardData'
+import { KpiCard, type KpiTone } from './KpiCard'
 
 export default function KpiCards() {
   const { metrics, loading } = useDashboardData()
@@ -7,20 +8,17 @@ export default function KpiCards() {
     return <div className="loading">Loading metrics…</div>
   }
 
+  const kpis: { label: string; value: string; tone: KpiTone }[] = [
+    { label: 'Events (24h)', value: metrics.totalEvents24h.toLocaleString(), tone: 'default' },
+    { label: 'Blocked (24h)', value: metrics.totalBlocked24h.toLocaleString(), tone: 'teal' },
+    { label: 'Active Sources', value: metrics.activeSources.toLocaleString(), tone: 'amber' },
+  ]
+
   return (
     <div className="kpi-row">
-      <div className="kpi-card">
-        <div className="kpi-label">Events (24h)</div>
-        <div className="kpi-value">{metrics.totalEvents24h.toLocaleString()}</div>
-      </div>
-      <div className="kpi-card teal">
-        <div className="kpi-label">Blocked (24h)</div>
-        <div className="kpi-value">{metrics.totalBlocked24h.toLocaleString()}</div>
-      </div>
-      <div className="kpi-card amber">
-        <div className="kpi-label">Active Sources</div>
-        <div className="kpi-value">{metrics.activeSources.toLocaleString()}</div>
-      </div>
+      {kpis.map((kpi) => (
+        <KpiCard key={kpi.label} {...kpi} />
+      ))}
     </div>
   )
 }

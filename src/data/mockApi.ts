@@ -1,4 +1,5 @@
 import type { Alert, DashboardMetrics, Severity, AlertStatus } from '../types'
+import { MOCK_LATENCY_MS } from '../constants'
 
 // Deterministic pseudo-random so the "before" and "after" branches render
 // the exact same dataset — the only thing that changes is how it's handled.
@@ -72,14 +73,10 @@ function buildMetrics(alerts: Alert[]): DashboardMetrics {
 const ALERTS = buildAlerts()
 const METRICS = buildMetrics(ALERTS)
 
-// Simulated network latency, same on both branches, so any speed
-// difference you feel while using the app comes from rendering, not fetch time.
-const LATENCY_MS = 250
-
 export function fetchAlerts(): Promise<Alert[]> {
-  return new Promise((resolve) => setTimeout(() => resolve(ALERTS), LATENCY_MS))
+  return new Promise((resolve) => setTimeout(() => resolve(ALERTS), MOCK_LATENCY_MS))
 }
 
 export function fetchMetrics(): Promise<DashboardMetrics> {
-  return new Promise((resolve) => setTimeout(() => resolve(METRICS), LATENCY_MS))
+  return new Promise((resolve) => setTimeout(() => resolve(METRICS), MOCK_LATENCY_MS))
 }
