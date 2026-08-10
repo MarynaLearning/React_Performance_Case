@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { FixedSizeList, type ListChildComponentProps } from 'react-window'
-import { useDashboardData } from '../hooks/useDashboardData'
-import { useFilteredAlerts } from '../hooks/useFilteredAlerts'
+import { useDashboardData } from '../../hooks/useDashboardData'
+import { useFilteredAlerts } from './useFilteredAlerts'
 import { AlertRow } from './AlertRow'
-import { ALERTS_LIST_HEIGHT, ALERTS_ROW_HEIGHT } from '../constants'
+import { ALERTS_LIST_HEIGHT, ALERTS_ROW_HEIGHT } from './constants'
+import './alerts.css'
 
 /**
  * Presentation only: renders the search input, the result count, and the

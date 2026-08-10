@@ -1,5 +1,6 @@
-import { useDashboardData } from '../hooks/useDashboardData'
+import { useDashboardData } from '../../hooks/useDashboardData'
 import { KpiCard, type KpiTone } from './KpiCard'
+import './kpis.css'
 
 export default function KpiCards() {
   const { metrics, loading } = useDashboardData()

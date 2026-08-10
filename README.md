@@ -57,41 +57,66 @@ account needed:
 
 ## Architecture (main branch)
 
-Beyond the performance fixes above, `main` is also structured around
-separation of concerns:
+Beyond the performance fixes above, `main` is organized by **feature**,
+not by file type. Each dashboard section owns its own component(s),
+styles, and logic in one folder, instead of components living in one
+place, styles in another, and hooks in a third:
 
 ```
 src/
-  components/
-    AlertsTable.tsx     presentation only — search input + virtualized list
-    AlertRow.tsx         one table row
-    SeverityBadge.tsx    reusable status atom
-    StatusDot.tsx        reusable status atom
-    KpiCards.tsx         data-driven — maps over a list of KPI configs
-    KpiCard.tsx          one KPI card
-    ChartPanel.tsx       reads colors from index.css custom properties
-    DashboardHeader.tsx  layout, separated from App
-    LiveClock.tsx        owns its own ticking state (colocated)
+  App.tsx                  composition root — owns no state of its own
+  main.tsx
+  types.ts                 shared data contracts, used across features
+  data/
+    mockApi.ts              data layer
   hooks/
-    useDashboardData.tsx shared data-fetching context
-    useFilteredAlerts.ts  filter/sort "controller" logic for the table
-    useDebouncedValue.ts  generic debounce utility
+    useDashboardData.tsx     shared fetch context (cross-feature)
+    useDebouncedValue.ts     generic utility (cross-feature)
   lib/
-    format.ts             pure, reusable formatting helpers
-  constants.ts             previously-scattered magic numbers, centralized
+    format.ts                pure formatting helpers (cross-feature)
+  styles/
+    tokens.css                design tokens + base resets — the only
+                               truly global CSS
+    shared.css                cross-feature UI primitives (.panel,
+                               .loading, app shell) that no single
+                               feature owns
+  features/
+    alerts/
+      AlertsTable.tsx          presentation — search input + list
+      AlertRow.tsx             one row
+      SeverityBadge.tsx        reusable atom
+      StatusDot.tsx            reusable atom
+      useFilteredAlerts.ts     filter/sort logic, colocated with its feature
+      constants.ts             debounce/list-sizing constants, colocated
+      alerts.css               styles, colocated
+    kpis/
+      KpiCards.tsx             data-driven, maps over a config array
+      KpiCard.tsx              one card
+      kpis.css
+    chart/
+      ChartPanel.tsx           reads colors from styles/tokens.css
+    header/
+      DashboardHeader.tsx
+      LiveClock.tsx            owns its own ticking state
+      constants.ts             tick interval, colocated
+      header.css
 ```
 
-The guiding rule: a file should do one thing. `AlertsTable.tsx` used to
-own data access, filtering logic, debounce wiring, and row rendering all
-at once — now each of those lives in its own file, and `AlertsTable.tsx`
-just wires them together. `App.tsx` used to hold a clock's `setInterval`
-state purely so a header could display it — now `LiveClock` owns that
-state itself, so a header clock ticking no longer re-renders anything
-above it in the tree.
+The rule of thumb: **things that change together live together.** A
+change to how alerts are filtered, styled, or laid out now touches only
+`features/alerts/` — it used to also require reasoning about a shared
+`index.css` file that every other section's styles lived in too. Only
+genuinely cross-feature things (data types, the shared fetch context, base
+design tokens) live outside a feature folder.
+
+`hooks/` and `lib/` intentionally still exist as shared layers — a hook or
+util used by more than one feature belongs there, not duplicated into
+each feature that needs it. Feature-local logic (like `useFilteredAlerts`)
+lives inside its feature instead.
 
 The `before-fix` branch is intentionally left unrefactored — it exists to
-demonstrate the render-behavior bugs, not architecture, so cleaning it up
-would blur the comparison.
+demonstrate the render-behavior bugs, not architecture, so restructuring
+it would blur the comparison.
 
 ## Testing with Lighthouse
 

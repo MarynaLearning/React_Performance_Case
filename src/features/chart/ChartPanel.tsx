@@ -1,12 +1,10 @@
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
-import { useDashboardData } from '../hooks/useDashboardData'
+import { useDashboardData } from '../../hooks/useDashboardData'
 
-// Colors reference the CSS custom properties defined in index.css
+// Colors reference the CSS custom properties defined in styles/tokens.css
 // (var(--signal-amber) etc.) rather than duplicating hex values here.
-// index.css stays the single source of truth for the palette — change a
-// color there and this chart follows automatically. Modern browsers
-// resolve CSS custom properties in SVG presentation attributes the same
-// way they do in stylesheets.
+// No chart-specific stylesheet is needed — layout comes from the shared
+// .panel/.panel-title primitives in styles/shared.css.
 export default function ChartPanel() {
   const { metrics, loading } = useDashboardData()
 

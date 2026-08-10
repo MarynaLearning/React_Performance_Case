@@ -1,5 +1,8 @@
 import type { Alert, DashboardMetrics, Severity, AlertStatus } from '../types'
-import { MOCK_LATENCY_MS } from '../constants'
+
+// Simulated network latency for the mock API — the only consumer of this
+// value, so it's kept local rather than in a shared constants file.
+const MOCK_LATENCY_MS = 250
 
 // Deterministic pseudo-random so the "before" and "after" branches render
 // the exact same dataset — the only thing that changes is how it's handled.

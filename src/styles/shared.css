@@ -1,0 +1,43 @@
+/* App shell — owned by App.tsx, the composition root, not any one feature */
+.app {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.footer-note {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: 24px;
+}
+
+/* Shared "panel" primitive — used by both the chart and alerts features.
+   Lives here rather than in either feature folder, since neither feature
+   owns it exclusively. */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  margin: 0 0 16px 0;
+}
+
+/* Shared loading state — used by kpis, chart, and alerts */
+.loading {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-dim);
+  padding: 40px 0;
+  text-align: center;
+}

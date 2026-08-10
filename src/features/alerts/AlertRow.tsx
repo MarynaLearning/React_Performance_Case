@@ -1,6 +1,6 @@
 import { memo, type CSSProperties } from 'react'
-import type { Alert } from '../types'
-import { formatTime } from '../lib/format'
+import type { Alert } from '../../types'
+import { formatTime } from '../../lib/format'
 import { SeverityBadge } from './SeverityBadge'
 import { StatusDot } from './StatusDot'
 

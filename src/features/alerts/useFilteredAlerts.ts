@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import type { Alert } from '../types'
-import { useDebouncedValue } from './useDebouncedValue'
-import { SEARCH_DEBOUNCE_MS } from '../constants'
+import type { Alert } from '../../types'
+import { useDebouncedValue } from '../../hooks/useDebouncedValue'
+import { SEARCH_DEBOUNCE_MS } from './constants'
 
 interface UseFilteredAlertsResult {
   filtered: Alert[]
