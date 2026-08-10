@@ -55,6 +55,30 @@ account needed:
    Time to Interactive / Total Blocking Time comparison — the windowed list
    on `main` mounts far fewer DOM nodes on first paint.
 
+## Testing with Lighthouse
+
+Run Lighthouse against the **production build**, not `npm run dev`. The
+dev server ships unminified, unbundled ES modules plus HMR client code —
+it will score noticeably lower on Performance than the real build, for
+reasons that have nothing to do with the app's code:
+
+```bash
+npm run build
+npm run preview
+# then run Lighthouse against the printed localhost URL (usually :4173)
+```
+
+Also included, on top of the four render-behavior fixes above:
+- Google Fonts loaded via non-blocking `<link rel="preconnect">` +
+  `<link rel="stylesheet">` in `index.html`, instead of a render-blocking
+  `@import` in CSS.
+- `<meta name="description">` and `<meta name="theme-color">` for SEO.
+- `aria-label` on the search input (unlabeled form fields fail
+  accessibility audits).
+- `ChartPanel` (and the `recharts` dependency it pulls in) code-split with
+  `React.lazy` + `Suspense`, so it loads after first paint instead of
+  blocking it.
+
 ## Stack
 
 React 18, TypeScript, Vite, Recharts, react-window.

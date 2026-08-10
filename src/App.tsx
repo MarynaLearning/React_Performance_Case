@@ -1,8 +1,12 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { DashboardDataProvider } from './hooks/useDashboardData'
 import KpiCards from './components/KpiCards'
-import ChartPanel from './components/ChartPanel'
 import AlertsTable from './components/AlertsTable'
+
+// recharts is one of the heaviest deps in this bundle. It's only needed
+// for one panel, so it's split into its own chunk and loaded after the
+// initial paint instead of blocking it.
+const ChartPanel = lazy(() => import('./components/ChartPanel'))
 
 export default function App() {
   // A live clock in the header, ticking every 2s — unrelated to alerts/metrics.
@@ -30,7 +34,9 @@ export default function App() {
         </header>
 
         <KpiCards />
-        <ChartPanel />
+        <Suspense fallback={<div className="loading">Loading chart…</div>}>
+          <ChartPanel />
+        </Suspense>
         <AlertsTable />
 
         <p className="footer-note">
